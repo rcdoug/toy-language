@@ -1,0 +1,244 @@
+❯ cargo run
+   Compiling toy_language v0.1.0 (/Users/rcdoug/Documents/school/Compilers/toy-language)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.39s
+     Running `target/debug/toy_language`
+Tokens: [Int, Id("sum_n"), LParen, Int, Id("n"), RParen, LBrace, Int, Id("sum"), Semicolon, Id("sum"), Assign, Num(0), Semicolon, While, LParen, Id("n"), Gt, Num(0), RParen, LBrace, Id("sum"), Assign, Id("sum"), Plus, Id("n"), Semicolon, Id("n"), Assign, Id("n"), Minus, Num(1), Semicolon, RBrace, Return, Id("sum"), Semicolon, RBrace, Void, Id("main"), LParen, Void, RParen, LBrace, Int, Id("number"), Semicolon, Output, LParen, StringLit("Sum Calculator"), RParen, Semicolon, Output, LParen, StringLit("Enter a number:"), RParen, Semicolon, Id("number"), Assign, Input, LParen, RParen, Semicolon, Output, LParen, StringLit("The sum from 1 to your number is:"), RParen, Semicolon, Output, LParen, Id("sum_n"), LParen, Id("number"), RParen, RParen, Semicolon, RBrace]
+
+ --------------------------
+
+AST: Program {
+    declarations: [
+        FunDecl(
+            FunDeclaration {
+                return_type: Int,
+                id: "sum_n",
+                params: [
+                    Param {
+                        type_spec: Int,
+                        id: "n",
+                        is_array: false,
+                    },
+                ],
+                body: CompoundStmt {
+                    local_decls: [
+                        VarDeclaration {
+                            type_spec: Int,
+                            id: "sum",
+                            array_size: None,
+                        },
+                    ],
+                    statements: [
+                        ExpressionStmt(
+                            Some(
+                                Assign {
+                                    var: Id(
+                                        "sum",
+                                    ),
+                                    expr: Num(
+                                        0,
+                                    ),
+                                },
+                            ),
+                        ),
+                        IterationStmt {
+                            condition: Binary {
+                                left: Var(
+                                    Id(
+                                        "n",
+                                    ),
+                                ),
+                                op: RelOp(
+                                    ">",
+                                ),
+                                right: Num(
+                                    0,
+                                ),
+                            },
+                            body: CompoundStmt(
+                                CompoundStmt {
+                                    local_decls: [],
+                                    statements: [
+                                        ExpressionStmt(
+                                            Some(
+                                                Assign {
+                                                    var: Id(
+                                                        "sum",
+                                                    ),
+                                                    expr: Binary {
+                                                        left: Var(
+                                                            Id(
+                                                                "sum",
+                                                            ),
+                                                        ),
+                                                        op: Add,
+                                                        right: Var(
+                                                            Id(
+                                                                "n",
+                                                            ),
+                                                        ),
+                                                    },
+                                                },
+                                            ),
+                                        ),
+                                        ExpressionStmt(
+                                            Some(
+                                                Assign {
+                                                    var: Id(
+                                                        "n",
+                                                    ),
+                                                    expr: Binary {
+                                                        left: Var(
+                                                            Id(
+                                                                "n",
+                                                            ),
+                                                        ),
+                                                        op: Sub,
+                                                        right: Num(
+                                                            1,
+                                                        ),
+                                                    },
+                                                },
+                                            ),
+                                        ),
+                                    ],
+                                },
+                            ),
+                        },
+                        ReturnStmt(
+                            Some(
+                                Var(
+                                    Id(
+                                        "sum",
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ],
+                },
+            },
+        ),
+        FunDecl(
+            FunDeclaration {
+                return_type: Void,
+                id: "main",
+                params: [],
+                body: CompoundStmt {
+                    local_decls: [
+                        VarDeclaration {
+                            type_spec: Int,
+                            id: "number",
+                            array_size: None,
+                        },
+                    ],
+                    statements: [
+                        OutputStmt(
+                            StringLit(
+                                "Sum Calculator",
+                            ),
+                        ),
+                        OutputStmt(
+                            StringLit(
+                                "Enter a number:",
+                            ),
+                        ),
+                        ExpressionStmt(
+                            Some(
+                                Assign {
+                                    var: Id(
+                                        "number",
+                                    ),
+                                    expr: Call {
+                                        id: "input",
+                                        args: [],
+                                    },
+                                },
+                            ),
+                        ),
+                        OutputStmt(
+                            StringLit(
+                                "The sum from 1 to your number is:",
+                            ),
+                        ),
+                        OutputStmt(
+                            Call {
+                                id: "sum_n",
+                                args: [
+                                    Var(
+                                        Id(
+                                            "number",
+                                        ),
+                                    ),
+                                ],
+                            },
+                        ),
+                    ],
+                },
+            },
+        ),
+    ],
+}
+
+ --------------------------
+
+Generated Stack Machine Code:
+CALL("main")
+JUMP("exit")
+LABEL("sum_n")
+PUSH(0)
+SAVE
+POP
+PUSH(0)
+PUSH(1)
+SAVE
+POP
+LABEL("while_start_0")
+PUSH(0)
+LOAD
+PUSH(0)
+GT
+BRZ("while_end_1")
+PUSH(1)
+LOAD
+PUSH(0)
+LOAD
+ADD
+PUSH(1)
+SAVE
+POP
+PUSH(0)
+LOAD
+PUSH(1)
+SUB
+PUSH(0)
+SAVE
+POP
+JUMP("while_start_0")
+LABEL("while_end_1")
+PUSH(1)
+LOAD
+RETV
+PUSH(0)
+RETV
+LABEL("main")
+PRINT(Some("Sum Calculator"))
+PRINT(Some("Enter a number:"))
+READ
+PUSH(2)
+SAVE
+POP
+PRINT(Some("The sum from 1 to your number is:"))
+PUSH(2)
+LOAD
+CALL("sum_n")
+PRINT(None)
+RET
+LABEL("exit")
+END
+
+ --------------------------
+
+Sum Calculator
+Enter a number:
+Input: 5
+The sum from 1 to your number is:
+15

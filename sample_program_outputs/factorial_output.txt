@@ -1,0 +1,194 @@
+❯ cargo run
+   Compiling toy_language v0.1.0 (/Users/rcdoug/Documents/school/Compilers/toy-language)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
+     Running `target/debug/toy_language`
+Tokens: [Int, Id("factorial"), LParen, Int, Id("n"), RParen, LBrace, If, LParen, Id("n"), Eq, Num(0), RParen, Return, Num(1), Semicolon, Else, Return, Id("n"), Star, Id("factorial"), LParen, Id("n"), Minus, Num(1), RParen, Semicolon, RBrace, Void, Id("main"), LParen, Void, RParen, LBrace, Int, Id("num"), Semicolon, Output, LParen, StringLit("Factorial Calculator"), RParen, Semicolon, Output, LParen, StringLit("Enter a number:"), RParen, Semicolon, Id("num"), Assign, Input, LParen, RParen, Semicolon, Output, LParen, StringLit("The factorial is:"), RParen, Semicolon, Output, LParen, Id("factorial"), LParen, Id("num"), RParen, RParen, Semicolon, RBrace]
+
+ --------------------------
+
+AST: Program {
+    declarations: [
+        FunDecl(
+            FunDeclaration {
+                return_type: Int,
+                id: "factorial",
+                params: [
+                    Param {
+                        type_spec: Int,
+                        id: "n",
+                        is_array: false,
+                    },
+                ],
+                body: CompoundStmt {
+                    local_decls: [],
+                    statements: [
+                        SelectionStmt {
+                            condition: Binary {
+                                left: Var(
+                                    Id(
+                                        "n",
+                                    ),
+                                ),
+                                op: RelOp(
+                                    "==",
+                                ),
+                                right: Num(
+                                    0,
+                                ),
+                            },
+                            then_stmt: ReturnStmt(
+                                Some(
+                                    Num(
+                                        1,
+                                    ),
+                                ),
+                            ),
+                            else_stmt: Some(
+                                ReturnStmt(
+                                    Some(
+                                        Binary {
+                                            left: Var(
+                                                Id(
+                                                    "n",
+                                                ),
+                                            ),
+                                            op: Mul,
+                                            right: Call {
+                                                id: "factorial",
+                                                args: [
+                                                    Binary {
+                                                        left: Var(
+                                                            Id(
+                                                                "n",
+                                                            ),
+                                                        ),
+                                                        op: Sub,
+                                                        right: Num(
+                                                            1,
+                                                        ),
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                    ),
+                                ),
+                            ),
+                        },
+                    ],
+                },
+            },
+        ),
+        FunDecl(
+            FunDeclaration {
+                return_type: Void,
+                id: "main",
+                params: [],
+                body: CompoundStmt {
+                    local_decls: [
+                        VarDeclaration {
+                            type_spec: Int,
+                            id: "num",
+                            array_size: None,
+                        },
+                    ],
+                    statements: [
+                        OutputStmt(
+                            StringLit(
+                                "Factorial Calculator",
+                            ),
+                        ),
+                        OutputStmt(
+                            StringLit(
+                                "Enter a number:",
+                            ),
+                        ),
+                        ExpressionStmt(
+                            Some(
+                                Assign {
+                                    var: Id(
+                                        "num",
+                                    ),
+                                    expr: Call {
+                                        id: "input",
+                                        args: [],
+                                    },
+                                },
+                            ),
+                        ),
+                        OutputStmt(
+                            StringLit(
+                                "The factorial is:",
+                            ),
+                        ),
+                        OutputStmt(
+                            Call {
+                                id: "factorial",
+                                args: [
+                                    Var(
+                                        Id(
+                                            "num",
+                                        ),
+                                    ),
+                                ],
+                            },
+                        ),
+                    ],
+                },
+            },
+        ),
+    ],
+}
+
+ --------------------------
+
+Generated Stack Machine Code:
+CALL("main")
+JUMP("exit")
+LABEL("factorial")
+PUSH(0)
+SAVE
+POP
+PUSH(0)
+LOAD
+PUSH(0)
+EQ
+BRZ("else_0")
+PUSH(1)
+RETV
+JUMP("endif_1")
+LABEL("else_0")
+PUSH(0)
+LOAD
+PUSH(0)
+LOAD
+PUSH(1)
+SUB
+CALL("factorial")
+MUL
+RETV
+LABEL("endif_1")
+PUSH(0)
+RETV
+LABEL("main")
+PRINT(Some("Factorial Calculator"))
+PRINT(Some("Enter a number:"))
+READ
+PUSH(1)
+SAVE
+POP
+PRINT(Some("The factorial is:"))
+PUSH(1)
+LOAD
+CALL("factorial")
+PRINT(None)
+RET
+LABEL("exit")
+END
+
+ --------------------------
+
+Factorial Calculator
+Enter a number:
+Input: 6
+The factorial is:
+720

@@ -1,0 +1,18 @@
+int sum_n(int n) {
+    int sum;
+    sum = 0;
+    while (n > 0) {
+        sum = sum + n;
+        n = n - 1;
+    }
+    return sum;
+}
+
+void main(void) {
+    int number;
+    output("Sum Calculator");
+    output("Enter a number:");
+    number = input();
+    output("The sum from 1 to your number is:");
+    output(sum_n(number));
+}

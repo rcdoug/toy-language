@@ -1,0 +1,263 @@
+❯ cargo run
+   Compiling toy_language v0.1.0 (/Users/rcdoug/Documents/school/Compilers/toy-language)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.36s
+     Running `target/debug/toy_language`
+Tokens: [Int, Id("gcd"), LParen, Int, Id("u"), Comma, Int, Id("v"), RParen, LBrace, If, LParen, Id("v"), Eq, Num(0), RParen, Return, Id("u"), Semicolon, Else, Return, Id("gcd"), LParen, Id("v"), Comma, Id("u"), Minus, Id("u"), Slash, Id("v"), Star, Id("v"), RParen, Semicolon, RBrace, Void, Id("main"), LParen, Void, RParen, LBrace, Int, Id("x"), Semicolon, Int, Id("y"), Semicolon, Output, LParen, StringLit("Euclid's GCD"), RParen, Semicolon, Output, LParen, StringLit("Enter a number:"), RParen, Semicolon, Id("x"), Assign, Input, LParen, RParen, Semicolon, Output, LParen, StringLit("Enter a second number:"), RParen, Semicolon, Id("y"), Assign, Input, LParen, RParen, Semicolon, Output, LParen, StringLit("Result:"), RParen, Semicolon, Output, LParen, Id("gcd"), LParen, Id("x"), Comma, Id("y"), RParen, RParen, Semicolon, RBrace]
+
+ --------------------------
+
+AST: Program {
+    declarations: [
+        FunDecl(
+            FunDeclaration {
+                return_type: Int,
+                id: "gcd",
+                params: [
+                    Param {
+                        type_spec: Int,
+                        id: "u",
+                        is_array: false,
+                    },
+                    Param {
+                        type_spec: Int,
+                        id: "v",
+                        is_array: false,
+                    },
+                ],
+                body: CompoundStmt {
+                    local_decls: [],
+                    statements: [
+                        SelectionStmt {
+                            condition: Binary {
+                                left: Var(
+                                    Id(
+                                        "v",
+                                    ),
+                                ),
+                                op: RelOp(
+                                    "==",
+                                ),
+                                right: Num(
+                                    0,
+                                ),
+                            },
+                            then_stmt: ReturnStmt(
+                                Some(
+                                    Var(
+                                        Id(
+                                            "u",
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            else_stmt: Some(
+                                ReturnStmt(
+                                    Some(
+                                        Call {
+                                            id: "gcd",
+                                            args: [
+                                                Var(
+                                                    Id(
+                                                        "v",
+                                                    ),
+                                                ),
+                                                Binary {
+                                                    left: Var(
+                                                        Id(
+                                                            "u",
+                                                        ),
+                                                    ),
+                                                    op: Sub,
+                                                    right: Binary {
+                                                        left: Binary {
+                                                            left: Var(
+                                                                Id(
+                                                                    "u",
+                                                                ),
+                                                            ),
+                                                            op: Div,
+                                                            right: Var(
+                                                                Id(
+                                                                    "v",
+                                                                ),
+                                                            ),
+                                                        },
+                                                        op: Mul,
+                                                        right: Var(
+                                                            Id(
+                                                                "v",
+                                                            ),
+                                                        ),
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    ),
+                                ),
+                            ),
+                        },
+                    ],
+                },
+            },
+        ),
+        FunDecl(
+            FunDeclaration {
+                return_type: Void,
+                id: "main",
+                params: [],
+                body: CompoundStmt {
+                    local_decls: [
+                        VarDeclaration {
+                            type_spec: Int,
+                            id: "x",
+                            array_size: None,
+                        },
+                        VarDeclaration {
+                            type_spec: Int,
+                            id: "y",
+                            array_size: None,
+                        },
+                    ],
+                    statements: [
+                        OutputStmt(
+                            StringLit(
+                                "Euclid's GCD",
+                            ),
+                        ),
+                        OutputStmt(
+                            StringLit(
+                                "Enter a number:",
+                            ),
+                        ),
+                        ExpressionStmt(
+                            Some(
+                                Assign {
+                                    var: Id(
+                                        "x",
+                                    ),
+                                    expr: Call {
+                                        id: "input",
+                                        args: [],
+                                    },
+                                },
+                            ),
+                        ),
+                        OutputStmt(
+                            StringLit(
+                                "Enter a second number:",
+                            ),
+                        ),
+                        ExpressionStmt(
+                            Some(
+                                Assign {
+                                    var: Id(
+                                        "y",
+                                    ),
+                                    expr: Call {
+                                        id: "input",
+                                        args: [],
+                                    },
+                                },
+                            ),
+                        ),
+                        OutputStmt(
+                            StringLit(
+                                "Result:",
+                            ),
+                        ),
+                        OutputStmt(
+                            Call {
+                                id: "gcd",
+                                args: [
+                                    Var(
+                                        Id(
+                                            "x",
+                                        ),
+                                    ),
+                                    Var(
+                                        Id(
+                                            "y",
+                                        ),
+                                    ),
+                                ],
+                            },
+                        ),
+                    ],
+                },
+            },
+        ),
+    ],
+}
+
+ --------------------------
+
+Generated Stack Machine Code:
+CALL("main")
+JUMP("exit")
+LABEL("gcd")
+PUSH(1)
+SAVE
+POP
+PUSH(0)
+SAVE
+POP
+PUSH(1)
+LOAD
+PUSH(0)
+EQ
+BRZ("else_0")
+PUSH(0)
+LOAD
+RETV
+JUMP("endif_1")
+LABEL("else_0")
+PUSH(1)
+LOAD
+PUSH(0)
+LOAD
+PUSH(0)
+LOAD
+PUSH(1)
+LOAD
+DIV
+PUSH(1)
+LOAD
+MUL
+SUB
+CALL("gcd")
+RETV
+LABEL("endif_1")
+PUSH(0)
+RETV
+LABEL("main")
+PRINT(Some("Euclid's GCD"))
+PRINT(Some("Enter a number:"))
+READ
+PUSH(2)
+SAVE
+POP
+PRINT(Some("Enter a second number:"))
+READ
+PUSH(3)
+SAVE
+POP
+PRINT(Some("Result:"))
+PUSH(2)
+LOAD
+PUSH(3)
+LOAD
+CALL("gcd")
+PRINT(None)
+RET
+LABEL("exit")
+END
+
+ --------------------------
+
+Euclid's GCD
+Enter a number:
+Input: 14
+Enter a second number:
+Input: 21
+Result:
+7

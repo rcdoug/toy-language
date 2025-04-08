@@ -1,0 +1,25 @@
+void main(void) {
+    int nums[5];
+    int i;
+    int max;
+    
+    output("Find Maximum");
+    output("Enter 5 numbers:");
+    
+    i = 0;
+    while (i < 5) {
+        nums[i] = input();
+        i = i + 1;
+    }
+    
+    max = nums[0];
+    i = 1;
+    while (i < 5) {
+        if (nums[i] - max > 0)
+            max = nums[i];
+        i = i + 1;
+    }
+    
+    output("The maximum number is:");
+    output(max);
+}

@@ -1,0 +1,15 @@
+int factorial(int n) {
+    if (n == 0)
+        return 1;
+    else
+        return n * factorial(n - 1);
+}
+
+void main(void) {
+    int num;
+    output("Factorial Calculator");
+    output("Enter a number:");
+    num = input();
+    output("The factorial is:");
+    output(factorial(num));
+}

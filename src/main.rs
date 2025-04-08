@@ -1,48 +1,43 @@
-mod stack_machine;
-mod tokenizer;
+mod lexer;
+mod ast;
 mod parser;
-mod code_generator;
+mod codegen;
+mod stack_machine;
 
-use std::fs;
-use std::error::Error;
-use tokenizer::{Lexer, Token};
+use lexer::Lexer;
 use parser::Parser;
-use code_generator::CodeGenerator;
-use stack_machine::{OutputMode, StackMachine};
+use codegen::CodeGenerator;
+use std::fs;
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let input: String = fs::read_to_string("input.txt")?;
+fn main() {
+    let source = fs::read_to_string("sample_programs/gcd.txt").expect("Unable to read file");
 
-    // Tokenization
-    let mut lexer = Lexer::new(&input);
+    // lexer.rs
+    let mut lex = Lexer::new(&source);
     let mut tokens = Vec::new();
-    loop {
-        let token = lexer.next_token();
-        if token == Token::EOF {
-            break;
-        }
-        tokens.push(token);
+    while let Some(tok) = lex.next_token() {
+        tokens.push(tok);
     }
+    println!("Tokens: {:?}", tokens);
+    println!("\n -------------------------- \n");
 
-    // Parsing
+    // ast.rs
     let mut parser = Parser::new(tokens);
-    let ast = parser.parse();
+    let program = parser.parse_program();
+    println!("AST: {:#?}", program);
+    println!("\n -------------------------- \n");
 
-    // Code Generation
-    let mut generator = CodeGenerator::new();
-    generator.generate(&ast);
-    let stack_code = generator.get_code();
-
-    // Print stack machine code
-    for instr in &stack_code {
+    // codegen.rs
+    let mut codegen = CodeGenerator::new();
+    let machine_code = codegen.generate(program);
+    println!("Generated Stack Machine Code:");
+    for instr in &machine_code {
         println!("{:?}", instr);
     }
+    println!("\n -------------------------- \n");
 
-    // Stack Machine Execution
-    let mut sm = StackMachine::new();
-    sm.output_mode = OutputMode::Raw;
-    sm.load_program(stack_code);
+    // stack_machine.rs
+    let mut sm = stack_machine::StackMachine::new();
+    sm.load_program(machine_code);
     sm.execute();
-
-    Ok(())
 }

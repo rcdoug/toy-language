@@ -1,0 +1,359 @@
+
+╭─ ~/Doc/school/Compilers/toy-language  on main !7 ?9 ──── ✔  took 3s  at 01:46:26
+❯ cargo run
+   Compiling toy_language v0.1.0 (/Users/rcdoug/Documents/school/Compilers/toy-language)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running `target/debug/toy_language`
+Tokens: [Void, Id("main"), LParen, Void, RParen, LBrace, Int, Id("nums"), LBracket, Num(5), RBracket, Semicolon, Int, Id("i"), Semicolon, Int, Id("max"), Semicolon, Output, LParen, StringLit("Find Maximum"), RParen, Semicolon, Output, LParen, StringLit("Enter 5 numbers:"), RParen, Semicolon, Id("i"), Assign, Num(0), Semicolon, While, LParen, Id("i"), Lt, Num(5), RParen, LBrace, Id("nums"), LBracket, Id("i"), RBracket, Assign, Input, LParen, RParen, Semicolon, Id("i"), Assign, Id("i"), Plus, Num(1), Semicolon, RBrace, Id("max"), Assign, Id("nums"), LBracket, Num(0), RBracket, Semicolon, Id("i"), Assign, Num(1), Semicolon, While, LParen, Id("i"), Lt, Num(5), RParen, LBrace, If, LParen, Id("nums"), LBracket, Id("i"), RBracket, Minus, Id("max"), Gt, Num(0), RParen, Id("max"), Assign, Id("nums"), LBracket, Id("i"), RBracket, Semicolon, Id("i"), Assign, Id("i"), Plus, Num(1), Semicolon, RBrace, Output, LParen, StringLit("The maximum number is:"), RParen, Semicolon, Output, LParen, Id("max"), RParen, Semicolon, RBrace]
+
+ --------------------------
+
+AST: Program {
+    declarations: [
+        FunDecl(
+            FunDeclaration {
+                return_type: Void,
+                id: "main",
+                params: [],
+                body: CompoundStmt {
+                    local_decls: [
+                        VarDeclaration {
+                            type_spec: Int,
+                            id: "nums",
+                            array_size: Some(
+                                5,
+                            ),
+                        },
+                        VarDeclaration {
+                            type_spec: Int,
+                            id: "i",
+                            array_size: None,
+                        },
+                        VarDeclaration {
+                            type_spec: Int,
+                            id: "max",
+                            array_size: None,
+                        },
+                    ],
+                    statements: [
+                        OutputStmt(
+                            StringLit(
+                                "Find Maximum",
+                            ),
+                        ),
+                        OutputStmt(
+                            StringLit(
+                                "Enter 5 numbers:",
+                            ),
+                        ),
+                        ExpressionStmt(
+                            Some(
+                                Assign {
+                                    var: Id(
+                                        "i",
+                                    ),
+                                    expr: Num(
+                                        0,
+                                    ),
+                                },
+                            ),
+                        ),
+                        IterationStmt {
+                            condition: Binary {
+                                left: Var(
+                                    Id(
+                                        "i",
+                                    ),
+                                ),
+                                op: RelOp(
+                                    "<",
+                                ),
+                                right: Num(
+                                    5,
+                                ),
+                            },
+                            body: CompoundStmt(
+                                CompoundStmt {
+                                    local_decls: [],
+                                    statements: [
+                                        ExpressionStmt(
+                                            Some(
+                                                Assign {
+                                                    var: ArrayAccess {
+                                                        id: "nums",
+                                                        index: Var(
+                                                            Id(
+                                                                "i",
+                                                            ),
+                                                        ),
+                                                    },
+                                                    expr: Call {
+                                                        id: "input",
+                                                        args: [],
+                                                    },
+                                                },
+                                            ),
+                                        ),
+                                        ExpressionStmt(
+                                            Some(
+                                                Assign {
+                                                    var: Id(
+                                                        "i",
+                                                    ),
+                                                    expr: Binary {
+                                                        left: Var(
+                                                            Id(
+                                                                "i",
+                                                            ),
+                                                        ),
+                                                        op: Add,
+                                                        right: Num(
+                                                            1,
+                                                        ),
+                                                    },
+                                                },
+                                            ),
+                                        ),
+                                    ],
+                                },
+                            ),
+                        },
+                        ExpressionStmt(
+                            Some(
+                                Assign {
+                                    var: Id(
+                                        "max",
+                                    ),
+                                    expr: Var(
+                                        ArrayAccess {
+                                            id: "nums",
+                                            index: Num(
+                                                0,
+                                            ),
+                                        },
+                                    ),
+                                },
+                            ),
+                        ),
+                        ExpressionStmt(
+                            Some(
+                                Assign {
+                                    var: Id(
+                                        "i",
+                                    ),
+                                    expr: Num(
+                                        1,
+                                    ),
+                                },
+                            ),
+                        ),
+                        IterationStmt {
+                            condition: Binary {
+                                left: Var(
+                                    Id(
+                                        "i",
+                                    ),
+                                ),
+                                op: RelOp(
+                                    "<",
+                                ),
+                                right: Num(
+                                    5,
+                                ),
+                            },
+                            body: CompoundStmt(
+                                CompoundStmt {
+                                    local_decls: [],
+                                    statements: [
+                                        SelectionStmt {
+                                            condition: Binary {
+                                                left: Binary {
+                                                    left: Var(
+                                                        ArrayAccess {
+                                                            id: "nums",
+                                                            index: Var(
+                                                                Id(
+                                                                    "i",
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ),
+                                                    op: Sub,
+                                                    right: Var(
+                                                        Id(
+                                                            "max",
+                                                        ),
+                                                    ),
+                                                },
+                                                op: RelOp(
+                                                    ">",
+                                                ),
+                                                right: Num(
+                                                    0,
+                                                ),
+                                            },
+                                            then_stmt: ExpressionStmt(
+                                                Some(
+                                                    Assign {
+                                                        var: Id(
+                                                            "max",
+                                                        ),
+                                                        expr: Var(
+                                                            ArrayAccess {
+                                                                id: "nums",
+                                                                index: Var(
+                                                                    Id(
+                                                                        "i",
+                                                                    ),
+                                                                ),
+                                                            },
+                                                        ),
+                                                    },
+                                                ),
+                                            ),
+                                            else_stmt: None,
+                                        },
+                                        ExpressionStmt(
+                                            Some(
+                                                Assign {
+                                                    var: Id(
+                                                        "i",
+                                                    ),
+                                                    expr: Binary {
+                                                        left: Var(
+                                                            Id(
+                                                                "i",
+                                                            ),
+                                                        ),
+                                                        op: Add,
+                                                        right: Num(
+                                                            1,
+                                                        ),
+                                                    },
+                                                },
+                                            ),
+                                        ),
+                                    ],
+                                },
+                            ),
+                        },
+                        OutputStmt(
+                            StringLit(
+                                "The maximum number is:",
+                            ),
+                        ),
+                        OutputStmt(
+                            Var(
+                                Id(
+                                    "max",
+                                ),
+                            ),
+                        ),
+                    ],
+                },
+            },
+        ),
+    ],
+}
+
+ --------------------------
+
+Generated Stack Machine Code:
+CALL("main")
+JUMP("exit")
+LABEL("main")
+PRINT(Some("Find Maximum"))
+PRINT(Some("Enter 5 numbers:"))
+PUSH(0)
+PUSH(5)
+SAVE
+POP
+LABEL("while_start_0")
+PUSH(5)
+LOAD
+PUSH(5)
+LT
+BRZ("while_end_1")
+READ
+PUSH(5)
+LOAD
+PUSH(0)
+ADD
+SAVE
+POP
+PUSH(5)
+LOAD
+PUSH(1)
+ADD
+PUSH(5)
+SAVE
+POP
+JUMP("while_start_0")
+LABEL("while_end_1")
+PUSH(0)
+PUSH(0)
+ADD
+LOAD
+PUSH(6)
+SAVE
+POP
+PUSH(1)
+PUSH(5)
+SAVE
+POP
+LABEL("while_start_2")
+PUSH(5)
+LOAD
+PUSH(5)
+LT
+BRZ("while_end_3")
+PUSH(5)
+LOAD
+PUSH(0)
+ADD
+LOAD
+PUSH(6)
+LOAD
+SUB
+PUSH(0)
+GT
+BRZ("else_4")
+PUSH(5)
+LOAD
+PUSH(0)
+ADD
+LOAD
+PUSH(6)
+SAVE
+POP
+JUMP("endif_5")
+LABEL("else_4")
+LABEL("endif_5")
+PUSH(5)
+LOAD
+PUSH(1)
+ADD
+PUSH(5)
+SAVE
+POP
+JUMP("while_start_2")
+LABEL("while_end_3")
+PRINT(Some("The maximum number is:"))
+PUSH(6)
+LOAD
+PRINT(None)
+RET
+LABEL("exit")
+END
+
+ --------------------------
+
+Find Maximum
+Enter 5 numbers:
+Input: 3
+Input: 10
+Input: 2
+Input: 5
+Input: 13
+The maximum number is:
+13
