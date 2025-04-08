@@ -10,6 +10,7 @@ use codegen::CodeGenerator;
 use std::fs;
 
 fn main() {
+    // ! MODIFY FILE PATH TO TEST DIFFERENT PROGRAMS
     let source = fs::read_to_string("sample_programs/gcd.txt").expect("Unable to read file");
 
     // lexer.rs
