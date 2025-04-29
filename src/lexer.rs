@@ -9,6 +9,13 @@ pub enum Token {
     Return,
     Output,
     Input,
+    // Additional statements
+    For,
+    Switch,
+    Case,
+    Default,
+    Break,
+    Continue,
 
     // Identifiers and Numbers
     Id(String),
@@ -34,7 +41,8 @@ pub enum Token {
     LBrace,       
     RBrace,      
     LBracket,   
-    RBracket,  
+    RBracket,
+    Colon, // Added for switch-case
 }
 
 pub struct Lexer {
@@ -83,6 +91,7 @@ impl Lexer {
             '}' => { self.pos += 1; Some(Token::RBrace) }
             '[' => { self.pos += 1; Some(Token::LBracket) }
             ']' => { self.pos += 1; Some(Token::RBracket) }
+            ':' => { self.pos += 1; Some(Token::Colon) } // Added for switch-case
             '=' => {
                 self.pos += 1;
                 if self.peek() == Some('=') {
@@ -160,14 +169,21 @@ impl Lexer {
         }
         let ident: String = self.input[start..self.pos].iter().collect();
         match ident.as_str() {
-            "int"    => Token::Int,
-            "void"   => Token::Void,
-            "if"     => Token::If,
-            "else"   => Token::Else,
-            "while"  => Token::While,
-            "return" => Token::Return,
-            "output" => Token::Output,
-            "input"  => Token::Input,
+            "int"      => Token::Int,
+            "void"     => Token::Void,
+            "if"       => Token::If,
+            "else"     => Token::Else,
+            "while"    => Token::While,
+            "return"   => Token::Return,
+            "output"   => Token::Output,
+            "input"    => Token::Input,
+            // Added tokens for additional statements
+            "for"      => Token::For,
+            "switch"   => Token::Switch,
+            "case"     => Token::Case,
+            "default"  => Token::Default,
+            "break"    => Token::Break,
+            "continue" => Token::Continue,
             _        => Token::Id(ident),
         }
     }
