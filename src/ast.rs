@@ -44,18 +44,44 @@ pub struct CompoundStmt {
 pub enum Statement {
     ExpressionStmt(Option<Expression>),
     CompoundStmt(CompoundStmt),
-    SelectionStmt {
+    SelectionStmt { // if
         condition: Expression,
         then_stmt: Box<Statement>,
         else_stmt: Option<Box<Statement>>,
     },
-    IterationStmt {
+    IterationStmt { // while
         condition: Expression,
         body: Box<Statement>,
     },
     ReturnStmt(Option<Expression>),
     OutputStmt(Expression),
+    ForStmt { // Added
+        initializer: Option<Box<Expression>>,
+        condition: Option<Box<Expression>>,
+        update: Option<Box<Expression>>,
+        body: Box<Statement>,
+    },
+    SwitchStmt { // Added
+        control_expr: Expression,
+        cases: Vec<CaseStmt>,
+        default_case: Option<DefaultStmt>,
+    },
+    BreakStmt, // Added
+    ContinueStmt, // Added
 }
+
+// Structs for switch (case and default)
+#[derive(Debug, Clone)]
+pub struct CaseStmt {
+    pub value: i32,
+    pub body: Box<Statement>,
+}
+
+#[derive(Debug, Clone)]
+pub struct DefaultStmt {
+   pub body: Box<Statement>,
+}
+
 
 #[derive(Debug, Clone)]
 pub enum Expression {
