@@ -9,7 +9,6 @@ pub enum Token {
     Return,
     Output,
     Input,
-    // Additional statements
     For,
     Switch,
     Case,
@@ -42,7 +41,7 @@ pub enum Token {
     RBrace,      
     LBracket,   
     RBracket,
-    Colon, // Added for switch-case
+    Colon,
 }
 
 pub struct Lexer {
@@ -91,7 +90,7 @@ impl Lexer {
             '}' => { self.pos += 1; Some(Token::RBrace) }
             '[' => { self.pos += 1; Some(Token::LBracket) }
             ']' => { self.pos += 1; Some(Token::RBracket) }
-            ':' => { self.pos += 1; Some(Token::Colon) } // Added for switch-case
+            ':' => { self.pos += 1; Some(Token::Colon) }
             '=' => {
                 self.pos += 1;
                 if self.peek() == Some('=') {
@@ -177,7 +176,6 @@ impl Lexer {
             "return"   => Token::Return,
             "output"   => Token::Output,
             "input"    => Token::Input,
-            // Added tokens for additional statements
             "for"      => Token::For,
             "switch"   => Token::Switch,
             "case"     => Token::Case,

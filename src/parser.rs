@@ -37,7 +37,6 @@ impl Parser {
     }
 
     fn parse_declaration(&mut self) -> Declaration {
-        // Either var-declaration or fun-declaration: first read type-specifier and ID.
         let type_spec = self.parse_type_specifier();
         match self.current_token() {
             Some(Token::Id(_)) => {
@@ -137,7 +136,6 @@ impl Parser {
         while let Some(tok) = self.current_token() {
             match tok {
                 Token::Int | Token::Void => {
-                    // Assume a var-declaration in local-declarations
                     let type_spec = self.parse_type_specifier();
                     if let Token::Id(id) = self.consume() {
                         decls.push(self.parse_var_declaration_with(type_spec, id));
@@ -167,10 +165,10 @@ impl Parser {
             Some(Token::While) => self.parse_iteration_stmt(),
             Some(Token::Return) => self.parse_return_stmt(),
             Some(Token::Output) => self.parse_output_stmt(),
-            Some(Token::For) => self.parse_for_stmt(),       // Added
-            Some(Token::Switch) => self.parse_switch_stmt(), // Added
-            Some(Token::Break) => self.parse_break_stmt(),   // Added
-            Some(Token::Continue) => self.parse_continue_stmt(), // Added
+            Some(Token::For) => self.parse_for_stmt(),
+            Some(Token::Switch) => self.parse_switch_stmt(),
+            Some(Token::Break) => self.parse_break_stmt(),
+            Some(Token::Continue) => self.parse_continue_stmt(),
             _ => self.parse_expression_stmt(),
         }
     }
@@ -409,13 +407,12 @@ impl Parser {
 
         // Condition
         let condition = if self.current_token() == Some(&Token::Semicolon) {
-            None // No condition means infinite loop (or break needed) - treat as true
+            None // Infinite loop / break needed. - treat as true
         } else {
             Some(Box::new(self.parse_expression()))
         };
         self.expect(&Token::Semicolon);
 
-        // Update
         let update = if self.current_token() == Some(&Token::RParen) {
             None
         } else {
@@ -451,7 +448,7 @@ impl Parser {
                     }
                     default_case = Some(self.parse_default_stmt());
                 },
-                Token::RBrace => break, // End of switch
+                Token::RBrace => break,
                 _ => panic!("Expected 'case', 'default', or '}}' in switch statement, got {:?}", tok),
             }
         }
@@ -470,11 +467,10 @@ impl Parser {
         self.expect(&Token::Colon);
 
         let mut body = Vec::new();
-        // Parse statements until the next case, default, or the end of the switch block
         while let Some(tok) = self.current_token() {
             match tok {
-                Token::Case | Token::Default | Token::RBrace => break, // Stop parsing statements for this case
-                _ => body.push(self.parse_statement()), // Parse the next statement
+                Token::Case | Token::Default | Token::RBrace => break,
+                _ => body.push(self.parse_statement()),
             }
         }
 
@@ -487,11 +483,10 @@ impl Parser {
         self.expect(&Token::Colon);
 
         let mut body = Vec::new();
-        // Parse statements until the next case, default, or the end of the switch block
         while let Some(tok) = self.current_token() {
             match tok {
-                Token::Case | Token::Default | Token::RBrace => break, // Stop parsing statements for default
-                _ => body.push(self.parse_statement()), // Parse the next statement
+                Token::Case | Token::Default | Token::RBrace => break,
+                _ => body.push(self.parse_statement()),
             }
         }
 

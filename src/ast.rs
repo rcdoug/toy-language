@@ -55,19 +55,19 @@ pub enum Statement {
     },
     ReturnStmt(Option<Expression>),
     OutputStmt(Expression),
-    ForStmt { // Added
+    ForStmt {
         initializer: Option<Box<Expression>>,
         condition: Option<Box<Expression>>,
         update: Option<Box<Expression>>,
         body: Box<Statement>,
     },
-    SwitchStmt { // Added
+    SwitchStmt {
         control_expr: Expression,
         cases: Vec<CaseStmt>,
         default_case: Option<DefaultStmt>,
     },
-    BreakStmt, // Added
-    ContinueStmt, // Added
+    BreakStmt,
+    ContinueStmt,
 }
 
 // Structs for switch (case and default)

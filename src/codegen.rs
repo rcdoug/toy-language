@@ -2,10 +2,10 @@ use crate::ast::*;
 use crate::stack_machine::Instruction;
 use std::collections::HashMap;
 
-// Structure to hold break/continue labels for loops/switches
+// Keep track of loop labels, makes it easier to implement complex control flow
 struct LoopContext {
     break_label: String,
-    continue_label: String, // For 'for' and 'while', this jumps to the condition/update part
+    continue_label: String,
 }
 
 pub struct CodeGenerator {
@@ -13,7 +13,7 @@ pub struct CodeGenerator {
     label_count: u32,
     next_addr: i32,
     scopes: Vec<HashMap<String, i32>>,
-    loop_context_stack: Vec<LoopContext>, // Added: Stack for break/continue labels
+    loop_context_stack: Vec<LoopContext>,
 }
 
 impl CodeGenerator {
@@ -23,7 +23,7 @@ impl CodeGenerator {
             label_count: 0,
             next_addr: 0,
             scopes: Vec::new(),
-            loop_context_stack: Vec::new(), // Added: Initialize stack
+            loop_context_stack: Vec::new(),
         }
     }
 
@@ -123,9 +123,9 @@ impl CodeGenerator {
 
                 self.generate_statement(*then_stmt);
                 if else_stmt.is_some() {
-                    self.emit(Instruction::JUMP(end_label.clone())); // Jump over else block if 'then' executed
+                    self.emit(Instruction::JUMP(end_label.clone()));
                     self.emit(Instruction::LABEL(else_label));
-                    self.generate_statement(*else_stmt.unwrap()); // Generate the else block
+                    self.generate_statement(*else_stmt.unwrap());
                 } else {
                    // If no else, BRZ already jumped to end_label
                 }
@@ -138,15 +138,15 @@ impl CodeGenerator {
                 // Push context for break/continue
                 self.loop_context_stack.push(LoopContext {
                     break_label: end_label.clone(),
-                    continue_label: start_label.clone(), // Continue goes back to condition check
+                    continue_label: start_label.clone(),
                 });
 
                 self.emit(Instruction::LABEL(start_label.clone()));
                 self.generate_expression(condition);
-                self.emit(Instruction::BRZ(end_label.clone())); // Jump to end if condition is false
+                self.emit(Instruction::BRZ(end_label.clone()));
 
                 self.generate_statement(*body);
-                self.emit(Instruction::JUMP(start_label)); // Loop back to condition check
+                self.emit(Instruction::JUMP(start_label));
                 self.emit(Instruction::LABEL(end_label));
 
                 // Pop context
@@ -171,53 +171,43 @@ impl CodeGenerator {
                     }
                 }
             },
-            // --- Added Cases ---
             ForStmt { initializer, condition, update, body } => {
                 let start_label = self.new_label("for_start");
-                let update_label = self.new_label("for_update"); // Continue targets here
-                let end_label = self.new_label("for_end");     // Break targets here
+                let update_label = self.new_label("for_update");
+                let end_label = self.new_label("for_end");
 
-                // Push context for break/continue
                  self.loop_context_stack.push(LoopContext {
                     break_label: end_label.clone(),
                     continue_label: update_label.clone(),
                 });
 
-                // 1. Initializer
                 if let Some(init_expr) = initializer {
                     self.generate_expression(*init_expr);
-                    self.emit(Instruction::POP); // Pop result of initializer
+                    self.emit(Instruction::POP);
                 }
 
-                // 2. Start label (condition check)
                 self.emit(Instruction::LABEL(start_label.clone()));
                 if let Some(cond_expr) = condition {
                     self.generate_expression(*cond_expr);
-                    self.emit(Instruction::BRZ(end_label.clone())); // Jump to end if condition false
+                    self.emit(Instruction::BRZ(end_label.clone()));
                 }
-                // If no condition, loop forever (until break)
 
-                // 3. Body
                 self.generate_statement(*body);
 
-                // 4. Update label (continue target)
                 self.emit(Instruction::LABEL(update_label.clone()));
                 if let Some(update_expr) = update {
                     self.generate_expression(*update_expr);
-                    self.emit(Instruction::POP); // Pop result of update
+                    self.emit(Instruction::POP);
                 }
 
-                // 5. Jump back to start (condition check)
                 self.emit(Instruction::JUMP(start_label));
 
-                // 6. End label (break target)
                 self.emit(Instruction::LABEL(end_label));
 
-                // Pop context
                 self.loop_context_stack.pop();
             },
             SwitchStmt { control_expr, cases, default_case } => {
-                let end_label = self.new_label("switch_end"); // Break targets here
+                let end_label = self.new_label("switch_end");
                 let mut case_labels = Vec::new();
 
                 self.loop_context_stack.push(LoopContext {
@@ -227,7 +217,6 @@ impl CodeGenerator {
 
                 self.generate_expression(control_expr);
 
-                // Generate jumps for each case
                 for (i, case_stmt) in cases.iter().enumerate() {
                     let case_label = self.new_label(&format!("case_{}", i));
                     case_labels.push(case_label.clone());
@@ -237,7 +226,6 @@ impl CodeGenerator {
                     self.emit(Instruction::BRT(case_label));
                 }
 
-                // Jump to default or end
                 let default_label = self.new_label("switch_default");
                 if default_case.is_some() {
                     self.emit(Instruction::JUMP(default_label.clone()));
@@ -245,38 +233,28 @@ impl CodeGenerator {
                     self.emit(Instruction::JUMP(end_label.clone()));
                 }
 
-                // Pop the switch value
                 self.emit(Instruction::POP);
 
-
-                // Generate code for each case body
                 for (i, case_stmt) in cases.into_iter().enumerate() {
                     self.emit(Instruction::LABEL(case_labels[i].clone()));
-                    // *** CHANGE HERE: Iterate through statements ***
                     for stmt in case_stmt.body {
                         self.generate_statement(stmt);
                     }
-                    // *** END CHANGE ***
                 }
 
-
-                // Generate default case body (if exists)
                 if let Some(def_stmt) = default_case {
                    self.emit(Instruction::LABEL(default_label));
-                   // *** CHANGE HERE: Iterate through statements ***
                    for stmt in def_stmt.body {
                        self.generate_statement(stmt);
                    }
-                   // *** END CHANGE ***
                 }
 
-                // End label for break statements
                 self.emit(Instruction::LABEL(end_label));
                 self.loop_context_stack.pop();
             },
             BreakStmt => {
                 if let Some(context) = self.loop_context_stack.last() {
-                     if context.break_label == "__invalid_continue_in_switch__" { // Check if we are wrongly inside switch
+                     if context.break_label == "__invalid_continue_in_switch__" { 
                           panic!("'continue' is not valid inside a 'switch' statement");
                      }
                     self.emit(Instruction::JUMP(context.break_label.clone()));
