@@ -1,0 +1,32 @@
+void swap(int &a, int &b) {
+    int temp;
+    output("Entering swap...");
+    output(a);
+    output(b);
+
+    temp = a;
+    a = b;
+    b = temp;
+
+    output("Leaving swap...");
+    output(a);
+    output(b);
+}
+
+void main(void) {
+    int x;
+    int y;
+
+    x = 10;
+    y = 20;
+
+    output("Before swap:");
+    output(x);
+    output(y);
+
+    swap(x, y);
+
+    output("After swap:");
+    output(x);
+    output(y);
+}

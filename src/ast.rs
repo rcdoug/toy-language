@@ -32,6 +32,7 @@ pub struct Param {
     pub type_spec: TypeSpecifier,
     pub id: String,
     pub is_array: bool,
+    pub is_ref: bool,
 }
 
 #[derive(Debug, Clone)]

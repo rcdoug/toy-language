@@ -113,14 +113,22 @@ impl Parser {
 
     fn parse_param(&mut self) -> Param {
         let type_spec = self.parse_type_specifier();
+        let mut is_ref = false;
+        if let Some(Token::Ampersand) = self.current_token() {
+            self.consume();
+            is_ref = true;
+        }
         let id = if let Token::Id(s) = self.consume() { s } else { panic!("Expected identifier in parameter") };
         let mut is_array = false;
         if let Some(Token::LBracket) = self.current_token() {
-            self.consume(); // consume '['
+            if is_ref {
+                panic!("Passing arrays by reference using '&' is not currently supported. Arrays are implicitly reference-like.");
+            }
+            self.consume();
             self.expect(&Token::RBracket);
             is_array = true;
         }
-        Param { type_spec, id, is_array }
+        Param { type_spec, id, is_array, is_ref }
     }
 
     fn parse_compound_stmt(&mut self) -> CompoundStmt {

@@ -42,6 +42,7 @@ pub enum Token {
     LBracket,   
     RBracket,
     Colon,
+    Ampersand,
 }
 
 pub struct Lexer {
@@ -91,6 +92,7 @@ impl Lexer {
             '[' => { self.pos += 1; Some(Token::LBracket) }
             ']' => { self.pos += 1; Some(Token::RBracket) }
             ':' => { self.pos += 1; Some(Token::Colon) }
+            '&' => { self.pos += 1; Some(Token::Ampersand) }
             '=' => {
                 self.pos += 1;
                 if self.peek() == Some('=') {

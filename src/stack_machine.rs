@@ -12,7 +12,6 @@ pub struct StackMachine {
 }
 
 struct StackFrame {
-    pub stack_offset: usize,
     pub ip: usize,
 }
 
@@ -42,7 +41,7 @@ pub enum Instruction {
     GE,
     // Control Flow
     JUMP(String),
-    CALL(String),
+    CALL(String, usize),
     RET,
     RETV,
     BRT(String),
@@ -149,22 +148,21 @@ impl StackMachine {
                         panic!("Label not found: {}", label);
                     }
                 }
-                Instruction::CALL(ref label) => {
+                Instruction::CALL(ref label, _arg_count) => {
+                    // Store return address
                     self.call_stack.push(StackFrame {
-                        stack_offset: self.stack.len(),
                         ip: self.program_counter + 1,
                     });
+                    // Jump to function
                     if let Some(&target) = self.labels.get(label) {
                         self.program_counter = target;
-                        continue;
+                        continue; // Continue execution at the function label
                     } else {
                         panic!("Label not found: {}", label);
                     }
                 }
                 Instruction::RET => {
                     if let Some(frame) = self.call_stack.pop() {
-                        // Restore stack pointer
-                        self.stack.truncate(frame.stack_offset);
                         self.program_counter = frame.ip;
                         continue;
                     } else {
@@ -172,11 +170,9 @@ impl StackMachine {
                     }
                 }
                 Instruction::RETV => {
-                    // Pop the return value from the stack
-                    let ret_value = self.stack.pop().expect("Stack underflow");
+                    let ret_value = self.stack.pop().expect("Stack underflow during RETV");
                     if let Some(frame) = self.call_stack.pop() {
-                        self.stack.truncate(frame.stack_offset);
-                        self.stack.push(ret_value);
+                        self.stack.push(ret_value); // Push return value back
                         self.gpr = ret_value;
                         self.program_counter = frame.ip;
                         continue;
