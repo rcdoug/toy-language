@@ -167,6 +167,10 @@ impl Parser {
             Some(Token::While) => self.parse_iteration_stmt(),
             Some(Token::Return) => self.parse_return_stmt(),
             Some(Token::Output) => self.parse_output_stmt(),
+            Some(Token::For) => self.parse_for_stmt(),       // Added
+            Some(Token::Switch) => self.parse_switch_stmt(), // Added
+            Some(Token::Break) => self.parse_break_stmt(),   // Added
+            Some(Token::Continue) => self.parse_continue_stmt(), // Added
             _ => self.parse_expression_stmt(),
         }
     }
@@ -388,5 +392,108 @@ impl Parser {
 
     fn look_ahead(&self, n: usize) -> Option<&Token> {
         self.tokens.get(self.pos + n)
+    }
+
+    // for ( [expression] ; [expression] ; [expression] ) statement
+    fn parse_for_stmt(&mut self) -> Statement {
+        self.expect(&Token::For);
+        self.expect(&Token::LParen);
+
+        // Initializer
+        let initializer = if self.current_token() == Some(&Token::Semicolon) {
+            None
+        } else {
+            Some(Box::new(self.parse_expression()))
+        };
+        self.expect(&Token::Semicolon);
+
+        // Condition
+        let condition = if self.current_token() == Some(&Token::Semicolon) {
+            None // No condition means infinite loop (or break needed) - treat as true
+        } else {
+            Some(Box::new(self.parse_expression()))
+        };
+        self.expect(&Token::Semicolon);
+
+        // Update
+        let update = if self.current_token() == Some(&Token::RParen) {
+            None
+        } else {
+            Some(Box::new(self.parse_expression()))
+        };
+        self.expect(&Token::RParen);
+
+        // Body
+        let body = Box::new(self.parse_statement());
+
+        Statement::ForStmt { initializer, condition, update, body }
+    }
+
+    // switch ( expression ) { case-list [default] }
+    fn parse_switch_stmt(&mut self) -> Statement {
+        self.expect(&Token::Switch);
+        self.expect(&Token::LParen);
+        let control_expr = self.parse_expression();
+        self.expect(&Token::RParen);
+        self.expect(&Token::LBrace);
+
+        let mut cases = Vec::new();
+        let mut default_case = None;
+
+        while let Some(tok) = self.current_token() {
+            match tok {
+                Token::Case => {
+                    cases.push(self.parse_case_stmt());
+                },
+                Token::Default => {
+                    if default_case.is_some() {
+                        panic!("Switch statement can only have one default case");
+                    }
+                    default_case = Some(self.parse_default_stmt());
+                },
+                Token::RBrace => break, // End of switch
+                _ => panic!("Expected 'case', 'default', or '}}' in switch statement, got {:?}", tok),
+            }
+        }
+        self.expect(&Token::RBrace);
+
+        Statement::SwitchStmt { control_expr, cases, default_case }
+    }
+
+    // case constant : statement
+    fn parse_case_stmt(&mut self) -> CaseStmt {
+        self.expect(&Token::Case);
+        let value = match self.consume() {
+            Token::Num(n) => n,
+            tok => panic!("Expected integer constant for case label, got {:?}", tok),
+        };
+        self.expect(&Token::Colon);
+        // NOTE: For simplicity, allow only one statement directly after case.
+        // To allow multiple, you'd expect a CompoundStmt ( { ... } ) or parse statement list until next case/default/}.
+        let body = Box::new(self.parse_statement());
+        CaseStmt { value, body }
+    }
+
+    // default : statement
+    fn parse_default_stmt(&mut self) -> DefaultStmt {
+        self.expect(&Token::Default);
+        self.expect(&Token::Colon);
+        // Same simplicity note as parse_case_stmt
+        let body = Box::new(self.parse_statement());
+        DefaultStmt { body }
+    }
+    
+    // break
+    fn parse_break_stmt(&mut self) -> Statement {
+        self.expect(&Token::Break);
+        self.expect(&Token::Semicolon);
+        Statement::BreakStmt
+    }
+
+    // continue
+    fn parse_continue_stmt(&mut self) -> Statement {
+        self.expect(&Token::Continue);
+        self.expect(&Token::Semicolon);
+        Statement::ContinueStmt
     }
 }
