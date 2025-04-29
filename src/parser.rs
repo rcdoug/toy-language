@@ -460,7 +460,7 @@ impl Parser {
         Statement::SwitchStmt { control_expr, cases, default_case }
     }
 
-    // case constant : statement
+    // case constant : statement-list
     fn parse_case_stmt(&mut self) -> CaseStmt {
         self.expect(&Token::Case);
         let value = match self.consume() {
@@ -468,18 +468,33 @@ impl Parser {
             tok => panic!("Expected integer constant for case label, got {:?}", tok),
         };
         self.expect(&Token::Colon);
-        // NOTE: For simplicity, allow only one statement directly after case.
-        // To allow multiple, you'd expect a CompoundStmt ( { ... } ) or parse statement list until next case/default/}.
-        let body = Box::new(self.parse_statement());
+
+        let mut body = Vec::new();
+        // Parse statements until the next case, default, or the end of the switch block
+        while let Some(tok) = self.current_token() {
+            match tok {
+                Token::Case | Token::Default | Token::RBrace => break, // Stop parsing statements for this case
+                _ => body.push(self.parse_statement()), // Parse the next statement
+            }
+        }
+
         CaseStmt { value, body }
     }
 
-    // default : statement
+    // default : statement-list
     fn parse_default_stmt(&mut self) -> DefaultStmt {
         self.expect(&Token::Default);
         self.expect(&Token::Colon);
-        // Same simplicity note as parse_case_stmt
-        let body = Box::new(self.parse_statement());
+
+        let mut body = Vec::new();
+        // Parse statements until the next case, default, or the end of the switch block
+        while let Some(tok) = self.current_token() {
+            match tok {
+                Token::Case | Token::Default | Token::RBrace => break, // Stop parsing statements for default
+                _ => body.push(self.parse_statement()), // Parse the next statement
+            }
+        }
+
         DefaultStmt { body }
     }
     

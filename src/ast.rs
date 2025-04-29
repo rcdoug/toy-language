@@ -74,12 +74,12 @@ pub enum Statement {
 #[derive(Debug, Clone)]
 pub struct CaseStmt {
     pub value: i32,
-    pub body: Box<Statement>,
+    pub body: Vec<Statement>,
 }
 
 #[derive(Debug, Clone)]
 pub struct DefaultStmt {
-   pub body: Box<Statement>,
+   pub body: Vec<Statement>,
 }
 
 

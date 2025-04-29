@@ -11,7 +11,7 @@ use std::fs;
 
 fn main() {
     // ! MODIFY FILE PATH TO TEST DIFFERENT PROGRAMS
-    let source = fs::read_to_string("sample_programs/gcd.txt").expect("Unable to read file");
+    let source = fs::read_to_string("sample_programs/control_flow.txt").expect("Unable to read file");
 
     // lexer.rs
     let mut lex = Lexer::new(&source);

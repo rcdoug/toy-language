@@ -1,0 +1,58 @@
+void main(void) {
+    int i;
+    int choice;
+    int count;
+
+    output("--- For Loop Demo ---");
+    count = 0;
+
+    for (i = 0; i < 5; i = i + 1) {
+        output(i);
+        count = count + 1;
+    }
+    output("For loop executed count:");
+    output(count);
+
+    output("--- For Loop with Continue ---");
+
+    for (i = 0; i < 6; i = i + 1) {
+        if (i - (i/2)*2 == 0) {
+            continue;
+        }
+        output(i);
+    }
+
+    output("--- For Loop with Break ---");
+
+    for (i = 0; ; i = i + 1) {
+        output(i);
+        if (i == 3) {
+            break;
+        }
+        if (i > 5) {
+            output("Safety break triggered");
+            break;
+        }
+    }
+    output("Loop broken at i = 3");
+
+
+    output("--- Switch Demo ---");
+    output("Enter a number (1-3, or other for default):");
+    choice = input();
+
+    switch (choice) {
+        case 1:
+            output("You chose One.");
+            break;
+        case 2:
+            output("You chose Two.");
+        case 3:
+            output("You chose Three (or fell through from Two).");
+            break;
+        default:
+            output("You chose something else.");
+            break;
+    }
+    output("Switch finished.");
+}
